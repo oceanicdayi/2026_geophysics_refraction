@@ -2,58 +2,276 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="一支鐵鎚與地表感測器：從震波紀錄、第一到時到地下科學模型的互動探究課。">
+  <meta name="description" content="用 Prediction 預測、Observation 觀察、Explain 解釋，從鐵鎚與地表感測器研究看不見的地下。">
   <title>地下有什麼？｜震波探究實驗室</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f2335'/%3E%3Cpath d='M3 17h6l3-8 5 15 4-9 3 2h5' fill='none' stroke='%2345e0c6' stroke-width='2.5'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css"><script src="app.js" defer></script>
 </head>
 <body>
-<header class="topbar"><a class="brand" href="#main"><span class="brand-mark">∿</span><span>震波探究實驗室<small>SEISMIC INQUIRY LAB</small></span></a><div class="top-actions"><span class="tag">教學模擬 · 非現地資料</span><button id="export-top" class="ghost">匯出探究紀錄</button></div></header>
+<header class="topbar"><a class="brand" href="#main"><span class="brand-mark">∿</span><span>震波探究實驗室<small>PREDICT · OBSERVE · EXPLAIN</small></span></a><div class="top-actions"><span class="tag">教學模擬 · 非現地資料</span><button id="export-top" class="ghost">匯出探究紀錄</button></div></header>
 <main id="main">
-  <div class="intro"><div><p class="eyebrow">看不見的地下，如何用證據研究？</p><h1>一支鐵鎚，能讓地下說話嗎？</h1><p>不挖洞。把感測器放在地表，找出震波抵達的規律，再建立能接受檢驗的模型。</p></div><div class="intro-aside"><strong>一支鐵鎚 × 地表感測器</strong><span>先觀察，再解釋；讓新證據改變你的想法。</span></div></div>
-  <nav class="steps" aria-label="探究步驟">
-    <button data-step="0" class="active" aria-current="step"><span>01</span>取得證據</button><button data-step="1"><span>02</span>找到規律</button><button data-step="2"><span>03</span>遇到新證據</button><button data-step="3"><span>04</span>建立與檢驗模型</button><button data-step="4"><span>05</span>提出論證</button>
+  <div class="intro">
+    <p class="eyebrow">POE 科學學習法</p>
+    <h1>一支鐵鎚，能讓地下說話嗎？</h1>
+    <p class="lead">不挖洞。敲一下鐵鎚，讓地表感測器記錄震波何時到達。每一輪都用同一個順序：<span class="nowrap">先預測，再觀察，最後解釋。</span></p>
+  </div>
+  <ol class="poe-legend" aria-label="POE 三個學習動作">
+    <li class="is-p">
+      <p class="poe-kicker">1 · Prediction</p>
+      <p class="poe-title">預測</p>
+      <p>看見結果之前，先寫下你認為會發生什麼，以及為什麼。</p>
+    </li>
+    <li class="is-o">
+      <p class="poe-kicker">2 · Observation</p>
+      <p class="poe-title">觀察</p>
+      <p>只記錄波形和到時。這個階段先不要寫地下的答案。</p>
+    </li>
+    <li class="is-e">
+      <p class="poe-kicker">3 · Explain</p>
+      <p class="poe-title">解釋</p>
+      <p>把預測和觀察放在一起。不一樣的地方，就是要修改模型的地方。</p>
+    </li>
+  </ol>
+  <nav class="steps" aria-label="三輪探究">
+    <button data-step="0" class="active" aria-current="step"><b>01</b>近距離</button>
+    <button data-step="1"><b>02</b>新證據</button>
+    <button data-step="2"><b>03</b>解釋模型</button>
   </nav>
-  <section class="prompt-banner" aria-labelledby="step-title"><span id="step-number">01 / 05</span><div><h2 id="step-title"></h2><p id="step-question"></p></div><button id="next-step" class="primary">下一步</button></section>
+  <section class="prompt-banner" aria-labelledby="step-title">
+    <div class="prompt-copy">
+      <span id="step-number">01 / 03</span>
+      <h2 id="step-title">第一輪｜近距離測線</h2>
+      <p id="step-question">遠的感測器會比較晚收到震波嗎？先寫下來，再敲擊看結果。</p>
+    </div>
+    <ol class="round-moves" aria-label="這一輪的預測、觀察與解釋">
+      <li class="is-p"><b>預測</b><span id="move-p">寫下遠近站誰先到，以及理由。</span></li>
+      <li class="is-o"><b>觀察</b><span id="move-o">從 1 個加到 5 個。敲擊後，標記每一站的第一到時。</span></li>
+      <li class="is-e"><b>解釋</b><span id="move-e">說出距離和到時的規律，並用它預測更遠的站。</span></li>
+    </ol>
+    <button id="next-step" class="primary">下一步</button>
+  </section>
   <div class="lab-grid">
+  <div id="predict-stack" class="predict-stack">
+    <details id="predict-near" class="card poe-details is-p" open>
+      <summary>Prediction｜預測：遠的站會比較晚到嗎？</summary>
+      <div class="details-body">
+        <p class="deck">敲擊點在 0 m，感測器每隔 3 m。先寫你的想法。寫完再按「敲擊並記錄」。</p>
+        <label for="prediction">我的預測與理由</label>
+        <textarea id="prediction" class="field-p" data-note="prediction" placeholder="我預測距離越遠，震波會……。因為……。"></textarea>
+      </div>
+    </details>
+    <details id="predict-far" class="card poe-details is-p" hidden>
+      <summary>Prediction｜預測：遠處大約何時會到？</summary>
+      <div class="details-body">
+        <p class="deck">先用近距離的直線做預測。寫完再敲這一輪的新紀錄。</p>
+        <label for="predict-far-text">我對遠處到時的預測</label>
+        <textarea id="predict-far-text" class="field-p" data-note="predict-far" placeholder="我預測 18 m 大約在 ___ ms 到，36 m 大約在 ___ ms 到。因為近距離的規律是……。"></textarea>
+      </div>
+    </details>
+  </div>
   <aside class="controls card">
-    <p class="eyebrow">SURVEY SETUP</p><h2>配置你的測線</h2>
+    <p class="eyebrow">測線配置</p><h2>配置你的測線</h2>
     <label for="sensor-count">感測器數量 <output id="count-label">1 個</output></label><input id="sensor-count" type="range" min="1" max="16" value="1">
     <div class="presets" aria-label="感測器數量快速選擇"><button data-count="1">1</button><button data-count="2">2</button><button data-count="3">3</button><button data-count="4">4</button><button data-count="5">5</button><button data-count="8">8</button><button data-count="12">12</button><button data-count="16">16</button></div>
     <dl class="specs"><div><dt>感測器間距</dt><dd>3 m</dd></div><div><dt>第一站距離</dt><dd>3 m</dd></div><div><dt>測線長度</dt><dd id="line-length">3 m</dd></div><div><dt>紀錄長度</dt><dd>20 s</dd></div><div><dt>同步取樣率</dt><dd>4,000 Hz</dd></div></dl>
-    <button id="strike" class="strike">敲擊並記錄</button><p class="small">開啟同步紀錄 → 等待 10 秒 → 敲擊 → 再記錄 10 秒。此處以加速動畫呈現。</p>
-    <div id="record-status" class="status" role="status">先寫下預測，再敲擊取得紀錄。</div>
+    <button id="strike" class="strike">敲擊並記錄</button>
+    <p class="small">順序是：開始記錄，第 10 秒敲擊，記到第 20 秒。畫面用加速方式播放。</p>
+    <div id="record-status" class="status" role="status">先寫上方的預測，再敲擊。</div>
     <label for="noise" class="check"><input id="noise" type="checkbox">加入背景雜訊</label>
     <div class="separator"></div>
-    <h3>先預測</h3><label class="sr-only" for="prediction">紀錄前的預測</label><textarea id="prediction" data-note="prediction" placeholder="距離越遠，震波會較早到、同時到，還是較晚到？為什麼？"></textarea>
-    <p class="small">你的文字會保存在這個瀏覽器，可匯出成 Markdown 學習紀錄。</p>
+    <h3>寫作順序</h3>
+    <ol class="poe-side">
+      <li><b>預測</b>在敲擊前寫完</li>
+      <li><b>觀察</b>只記波形和到時</li>
+      <li><b>解釋</b>對照之後再下結論</li>
+    </ol>
+    <p class="small">文字存在這個瀏覽器。離開前可匯出 Markdown。</p>
   </aside>
   <div class="workspace">
-    <section class="card field-card"><div class="section-head"><div><p class="eyebrow">FIELD LAYOUT</p><h2>地表實際配置</h2></div><span class="tag">俯視配置 · 公尺比例</span></div><div class="diagram-frame" tabindex="0" aria-label="可左右捲動的測線或剖面圖"><svg id="layout" viewBox="0 0 900 180" role="img" aria-label="鐵鎚敲擊點與每隔三公尺配置的感測器"></svg></div><div class="legend"><span><i class="dot amber"></i>敲擊點 0 m</span><span><i class="dot teal"></i>地表感測器</span><span>地下目前不可見；窄螢幕可左右捲動此配置圖。</span></div><div class="timeline"><span>0 s<br><b>開始記錄</b></span><span class="shot">10 s<br><b>鐵鎚敲擊</b></span><span>20 s<br><b>停止記錄</b></span></div></section>
-    <section class="card wave-card"><div class="section-head"><div><p class="eyebrow">OBSERVATION</p><h2>感測器觀測紀錄</h2></div><div class="segmented" aria-label="紀錄顯示尺度"><button id="zoom-view" aria-pressed="true" class="selected">到時放大</button><button id="full-view" aria-pressed="false">完整 20 秒</button></div></div>
-      <p id="wave-help" class="small">取得紀錄後，在每列波形「最早開始偏離背景」的位置點選第一到時。選波形起點，不是最高波峰。</p>
+    <section class="card field-card"><div class="section-head"><div><p class="eyebrow">地表配置</p><h2>感測器放在哪裡？</h2></div><span class="tag">俯視 · 公尺比例</span></div>
+      <p class="deck">敲擊點在左端。感測器沿一條直線往右排。這一張圖是地表，地下還沒有畫出來。</p>
+      <div class="diagram-frame" tabindex="0" aria-label="可左右捲動的測線配置圖"><svg id="layout" viewBox="0 0 900 180" role="img" aria-label="鐵鎚敲擊點與每隔三公尺配置的感測器"></svg></div>
+      <div class="legend"><span><i class="dot amber"></i>敲擊點 0 m</span><span><i class="dot teal"></i>地表感測器</span><span>窄螢幕可左右捲動這張圖。</span></div>
+      <div class="timeline"><span>0 s<br><b>開始記錄</b></span><span class="shot">10 s<br><b>鐵鎚敲擊</b></span><span>20 s<br><b>停止記錄</b></span></div>
+    </section>
+    <section class="card wave-card"><div class="section-head"><div><p class="eyebrow">Observation｜觀察</p><h2>感測器記錄到什麼？</h2></div><div class="segmented" aria-label="紀錄顯示尺度"><button id="zoom-view" aria-pressed="true" class="selected">到時放大</button><button id="full-view" aria-pressed="false">完整 20 秒</button></div></div>
+      <p id="wave-help" class="deck">取得紀錄後，點每列波形最早離開背景的位置。那一點是第一到時。</p>
       <div class="canvas-frame"><canvas id="waves" role="img" aria-label="依距離排序的震波紀錄；第一到時也可在下方表格用鍵盤輸入"></canvas></div>
-      <div class="plot-footer"><span id="wave-scale">橫軸：敲擊後時間（ms）；縱向：距離（m）</span><span>各站振幅已正規化，勿用大小判斷材料。</span></div>
+      <div class="plot-footer"><span id="wave-scale">橫軸：敲擊後時間（ms）；縱向：距離（m）</span><span>各站振幅已調整到相近大小，不能用高低判斷材料。</span></div>
       <div class="actions"><button id="auto-pick" class="secondary">提示：標記模擬第一到時</button><button id="clear-picks" class="ghost">清除到時標記</button><span id="pick-summary" class="small" aria-live="polite">尚未標記</span></div>
-      <details><summary>到時表格／鍵盤輸入</summary><p class="small">走時 = 到達時間 − 敲擊時間。敲擊在紀錄的第 10 秒；下表填敲擊後毫秒數。可修改點選結果。</p><div class="table-scroll"><table><thead><tr><th>感測器</th><th>距離 x（m）</th><th>走時 t（ms）</th><th>紀錄到達時間（s）</th></tr></thead><tbody id="pick-table"></tbody></table></div><button id="export-csv" class="ghost">下載到時 CSV</button></details>
+      <details><summary>到時表格與鍵盤輸入</summary>
+        <p class="deck">走時 = 到達時間 − 敲擊時間。敲擊在紀錄的第 10 秒。下表填敲擊之後的毫秒，也可以修改點選結果。</p>
+        <div class="table-scroll"><table><thead><tr><th>感測器</th><th>距離 x（m）</th><th>走時 t（ms）</th><th>紀錄到達時間（s）</th></tr></thead><tbody id="pick-table"></tbody></table></div>
+        <button id="export-csv" class="ghost">下載到時 CSV</button>
+      </details>
     </section>
-    <section id="analysis" class="card" hidden><div class="section-head"><div><p class="eyebrow">PATTERN → PREDICTION</p><h2>從到時找到規律</h2></div><span class="tag">橫軸 x · 縱軸 t</span></div><p>點落在同一直線嗎？先用近距離觀測預測遠距離，再看預測是否成立。</p><div class="canvas-frame"><canvas id="travel" role="img" aria-label="距離走時圖，包含標記觀測點與近距離直線預測"></canvas></div><div class="legend"><span><i class="dot teal"></i>你標記的觀測</span><span><i class="line amber"></i>近距離直線與外推</span><span id="model-legend" hidden><i class="line purple"></i>你的模型預測</span></div>
-      <div class="fit-controls"><label for="split">近距離／遠距離分界（m）</label><select id="split"><option>9</option><option>12</option><option selected>15</option><option>18</option><option>21</option><option>24</option><option>30</option><option>36</option></select><button id="fit" class="secondary">計算兩段直線</button></div><div id="fit-results" class="readout" aria-live="polite">至少標記兩個不同距離的到時，才能估算斜率。</div>
-      <details><summary>斜率和速度，到底有什麼關係？</summary><p>這張走時圖的橫軸是距離 x、縱軸是時間 t，因此斜率 m = Δt / Δx。若 t 用毫秒表示，v = 1000 / m（m/s）。斜率越小，速度越快。</p><p>波形圖的座標方向不同：時間在橫軸、距離沿縱向排列。請先看座標軸，再解釋斜率。不要直接連接各列的最高波峰；要比較同一類震波的第一到時。</p></details>
+    <details id="observe-near" class="card poe-details is-o" open>
+      <summary>Observation｜我觀察到什麼？</summary>
+      <div class="details-body">
+        <p class="deck">只寫看得到的事：波形從哪裡開始、遠站比近站早到還是晚到。先不要寫地下有幾層。</p>
+        <label for="observation">觀察紀錄</label>
+        <textarea id="observation" class="field-o" data-note="observation" placeholder="例如：每個站都有波形。距離越遠，第一到時越晚。3 m 約在 ___ ms。"></textarea>
+      </div>
+    </details>
+    <section id="analysis" class="card">
+      <div class="section-head"><div><p class="eyebrow">從觀察到規律</p><h2>距離和到時，排成一條線嗎？</h2></div><span class="tag">橫軸 x · 縱軸 t</span></div>
+      <p class="deck">至少標記兩個到時。若點排成直線，這條線就是你對更遠測站的預測。</p>
+      <div class="canvas-frame"><canvas id="travel" role="img" aria-label="距離走時圖，包含標記的觀察點與近距離直線"></canvas></div>
+      <div class="legend"><span><i class="dot teal"></i>你標記的觀察</span><span><i class="line amber"></i>近距離直線，可向外預測</span><span id="far-fit-legend" hidden><i class="line teal"></i>遠距離第二段直線</span><span id="model-legend" hidden><i class="line purple"></i>你的模型預測</span></div>
+      <div id="two-segment" class="fit-controls" hidden>
+        <label for="split">近距離與遠距離的分界（m）</label>
+        <select id="split"><option>9</option><option>12</option><option selected>15</option><option>18</option><option>21</option><option>24</option><option>30</option><option>36</option></select>
+        <button id="fit" class="secondary">計算兩段直線</button>
+      </div>
+      <div id="fit-results" class="readout" aria-live="polite">至少標記兩個不同距離的到時，才能估算斜率。</div>
+      <details><summary>斜率和速度有什麼關係？</summary>
+        <p>這張圖的橫軸是距離 x，縱軸是時間 t。斜率 = 時間差 ÷ 距離差。</p>
+        <p>時間用毫秒時，速度（m/s）= 1000 ÷ 斜率。斜率越小，速度越快。</p>
+        <p>波形圖的座標不一樣：時間在橫軸，距離沿縱向排列。先看座標軸，再解釋斜率。請比較同一種波的第一到時。最高波峰會受波形疊加影響。</p>
+      </details>
     </section>
-    <section id="surprise" class="card question-card" hidden><p class="eyebrow">WHEN A MODEL FAILS</p><h2>遠處的波，為什麼比預測早到？</h2><p>保留近距離的觀測，增加到 8、12 或 16 個感測器。若遠處的第一到時落在原本直線下方，原來的單一速度模型還足夠嗎？</p><div class="inquiry-questions"><p><b>觀察</b>你看到的是「到時規律改變」，還是「所有震波突然變快」？</p><p><b>假說</b>除了地下分層，時鐘誤差、橫向材料差異能否產生類似結果？</p><p><b>驗證</b>從另一端敲擊、重複敲擊或延長測線，可以排除哪些解釋？</p></div><label for="hypothesis">提出可被檢驗的假說</label><textarea id="hypothesis" data-note="hypothesis" placeholder="我的假說是……如果成立，新增或反向觀測應該……"></textarea></section>
-    <section id="model-section" class="card" hidden><div class="section-head"><div><p class="eyebrow">MODEL → TEST → REVISE</p><h2>建立你的地下模型</h2></div><span class="tag">調整模型，不改變既有觀測</span></div><p>選擇模型、調整參數，讓紫色預測線盡量解釋你的到時點。符合資料的模型仍需要新證據檢驗。</p>
-      <div class="model-controls"><label>模型<select id="model-type"><option value="one">單一均勻介質</option><option value="two">水平兩層介質</option></select></label><label for="v1">上層速度 v₁ <output id="v1-label"></output><input id="v1" type="range" min="150" max="600" step="10" value="300"></label><label for="v2">下層速度 v₂ <output id="v2-label"></output><input id="v2" type="range" min="200" max="1500" step="10" value="700"></label><label for="depth">上層厚度 h <output id="depth-label"></output><input id="depth" type="range" min="1" max="15" step="0.5" value="4"></label></div>
-      <div id="model-results" class="readout" aria-live="polite"></div><div class="ray-controls"><label for="ray-station">比較哪個感測器的路徑？</label><select id="ray-station"></select><button id="animate-ray" class="secondary">播放兩條路徑競賽</button></div><div class="diagram-frame" tabindex="0" aria-label="可左右捲動的測線或剖面圖"><svg id="section" viewBox="0 0 900 340" role="img" aria-label="學生提出的地下剖面模型與直達、臨界折射路徑"></svg></div><div class="legend"><span><i class="line amber"></i>上層直達路徑</span><span><i class="line purple"></i>經高速層的臨界折射路徑</span><span>剖面比例依軸刻度；這是你提出的模型。</span></div>
-      <label for="revision">記錄模型修正</label><textarea id="revision" data-note="revision" placeholder="原來模型無法解釋……我把……改為……新的模型預測……"></textarea>
-      <details><summary>需要提示？認識臨界折射與模型假設</summary><p>當水平下層的速度比上層快，震波可以在臨界角入射到界面，沿高速層頂部傳播，同時把波送回地表（首波／head wave）。遠處可能由這條路徑先到；近處通常由直達波先到。路徑較長，仍可能花較少時間。</p><p>直達波：t = x / v₁。臨界折射波：t = tᵢ + x / v₂；tᵢ = 2h cos(i꜀) / v₁；sin(i꜀) = v₁ / v₂。速度採 m/s 時，算出的 t 為秒。</p><p>臨界折射路徑只在 x ≥ 2h tan(i꜀) 時成立。交會距離 xcross = tᵢ / (1/v₁ − 1/v₂)，是兩路徑走時相等處；它與臨界距離不同。</p><p>此模型假設：地表平坦、地層水平、每層均勻、測點同步、比較同類波。若 v₂ ≤ v₁，本方法不會出現由高速下層造成的第二段首波直線。單一直線也不能證明地下沒有分層；較深界面或低速層可能尚未被辨識。兩段斜率支持速度分層的解釋，不能直接確定岩性或唯一地下構造。</p></details>
+    <details id="explain-near" class="card poe-details is-e" open>
+      <summary>Explain｜這個規律可以解釋什麼？</summary>
+      <div class="details-body">
+        <p class="deck">用你的觀察說明規律。若這個解釋是對的，更遠的站應該會怎樣？</p>
+        <label for="explain-near-text">我的解釋</label>
+        <textarea id="explain-near-text" class="field-e" data-note="explain-near" placeholder="我觀察到距離越遠，到時越晚。我的解釋是……。若這個解釋正確，更遠的站應該……。"></textarea>
+      </div>
+    </details>
+    <section id="surprise" class="card question-card" hidden>
+      <details id="far-details" open>
+        <summary>第二輪｜Observation 與 Explain</summary>
+        <div class="details-body">
+          <p class="deck">標記新測站之後，把圖上的點和你的預測直線比一比。</p>
+          <ul class="ask">
+            <li><b>觀察</b>新的點還在原來的直線上嗎？比預測早，還是比預測晚？</li>
+            <li><b>解釋</b>若一個速度不夠，你要改的是路徑、材料速度，還是量測方式？</li>
+            <li><b>再檢驗</b>從另一端敲，或再把測線延長，可以怎麼檢查新解釋？</li>
+          </ul>
+          <div class="poe-fields">
+            <label class="field-block field-o" for="observe-far">Observation｜我觀察到
+              <span class="hint">寫出距離、到時，以及它和預測差多少。</span>
+              <textarea id="observe-far" data-note="observe-far" placeholder="例如：18 m 的到時是 ___ ms。我原本預測 ___ ms。兩者相差 ___ ms。"></textarea>
+            </label>
+            <label class="field-block field-e" for="hypothesis">Explain｜我的新解釋
+              <span class="hint">解釋要能推出下一次觀察會看到什麼。</span>
+              <textarea id="hypothesis" data-note="hypothesis" placeholder="我的解釋是……。如果成立，下一次觀察應該看到……。"></textarea>
+            </label>
+          </div>
+        </div>
+      </details>
     </section>
-    <section id="conclusion" class="card" hidden><p class="eyebrow">CLAIM · EVIDENCE · REASONING</p><h2>用證據說明你看不見的地下</h2><div class="cer"><label>Claim｜主張<textarea id="claim" data-note="claim" placeholder="我認為地下可能……"></textarea></label><label>Evidence｜證據<textarea id="evidence" data-note="evidence" placeholder="引用距離、到時、斜率或模型誤差，不只寫「看起來」……"></textarea></label><label>Reasoning｜推理<textarea id="reasoning" data-note="reasoning" placeholder="為什麼這些證據支持主張？路徑與速度如何解釋先後到達？"></textarea></label></div><label for="next-test">下一次檢驗與模型限制</label><textarea id="next-test" data-note="next-test" placeholder="哪些因素仍不確定？我會新增什麼觀測？若模型正確，預測應為……"></textarea>
-      <div class="exit-ticket"><h3>Exit Ticket</h3><ol><li>走時圖的第二段較平，代表什麼？</li><li>只有五個近距離感測器，能否排除地下還有一層？</li><li>如何區分觀測證據與地下模型？</li></ol><label for="exit">我的回答</label><textarea id="exit" data-note="exit" placeholder="1. …　2. …　3. …"></textarea></div><button id="export-bottom" class="primary">下載我的完整探究紀錄</button><p class="closing">We cannot see underground, but we can build and test a model from evidence.</p>
+    <section id="model-section" class="card" hidden>
+      <div class="section-head"><div><p class="eyebrow">Explain｜用模型解釋</p><h2>哪一個地下模型比較接近觀察？</h2></div><span class="tag">調整模型，不會改動已記錄的波形</span></div>
+      <p class="deck">先預測遠站由哪一條路徑先到。再調參數，讓紫色線接近你標記的點。最後寫下你改了什麼。</p>
+      <label class="field-block field-p" for="predict-model">Prediction｜路徑預測
+        <span class="hint">路徑比較長，花費的時間不一定比較多。先寫預測，再移動滑桿。</span>
+        <textarea id="predict-model" data-note="predict-model" placeholder="我預測較遠的站會由____路徑先到，因為……。"></textarea>
+      </label>
+      <div class="model-controls">
+        <label>模型<select id="model-type"><option value="one">單一均勻介質</option><option value="two">水平兩層介質</option></select></label>
+        <label for="v1">上層速度 v₁ <output id="v1-label"></output><input id="v1" type="range" min="150" max="600" step="10" value="300"></label>
+        <label for="v2">下層速度 v₂ <output id="v2-label"></output><input id="v2" type="range" min="200" max="1500" step="10" value="700"></label>
+        <label for="depth">上層厚度 h <output id="depth-label"></output><input id="depth" type="range" min="1" max="15" step="0.5" value="4"></label>
+      </div>
+      <div id="model-results" class="readout" aria-live="polite"></div>
+      <div class="ray-controls"><label for="ray-station">比較哪個感測器的路徑？</label><select id="ray-station"></select><button id="animate-ray" class="secondary">播放兩條路徑競賽</button></div>
+      <div class="diagram-frame" tabindex="0" aria-label="可左右捲動的地下剖面圖"><svg id="section" viewBox="0 0 900 340" role="img" aria-label="學生提出的地下剖面模型與直達、臨界折射路徑"></svg></div>
+      <div class="legend"><span><i class="line amber"></i>上層直達路徑</span><span><i class="line purple"></i>經過下層的臨界折射路徑</span><span>這是你提出的模型。比例請看座標軸。</span></div>
+      <label for="revision">Explain｜我如何修正模型</label>
+      <textarea id="revision" class="field-e" data-note="revision" placeholder="觀察和原本的預測哪裡不同？我把模型的……改成……。新解釋預測下一次會看到……。"></textarea>
+      <details><summary>需要提示時，再看臨界折射</summary>
+        <p>下層比上層快，而且界面接近水平時，震波可以沿界面滑行，再回到地表。這條波叫首波，或臨界折射波。近處通常直達波先到。遠處有時這條比較長的路徑會先到。</p>
+        <dl class="formula">
+          <div><dt>直達波</dt><dd>t = x / v₁</dd></div>
+          <div><dt>臨界角</dt><dd>sin i꜀ = v₁ / v₂，而且 v₂ 要比 v₁ 快</dd></div>
+          <div><dt>臨界折射波</dt><dd>t = tᵢ + x / v₂</dd></div>
+          <div><dt>截距時間</dt><dd>tᵢ = 2h cos i꜀ / v₁</dd></div>
+          <div><dt>臨界距離</dt><dd>x = 2h tan i꜀ 以後，這條路徑才成立</dd></div>
+          <div><dt>交會距離</dt><dd>兩條路徑時間相等的位置。它和臨界距離不同。</dd></div>
+        </dl>
+        <p>速度用 m/s、距離用 m 時，算出來的 t 是秒。圖上的時間是毫秒。</p>
+        <p>這個模型還假設：地表平坦、每一層內部均勻、測站時間同步、比較的是同一種波。下層若比較慢，就不會出現這條第二段直線。只看到一條直線，也不能因此說地下只有一層。兩段斜率可以支持「速度分層」的解釋，還不能直接說出岩石名稱。</p>
+      </details>
+    </section>
+    <section id="conclusion" class="card" hidden>
+      <p class="eyebrow">Explain｜把解釋說清楚</p>
+      <h2>用主張、證據、推理寫下你的解釋</h2>
+      <p class="deck">主張是你的解釋。證據是你觀察到的數字。推理說明為什麼這些證據支持主張。</p>
+      <div class="cer">
+        <label>主張 Claim<textarea id="claim" data-note="claim" placeholder="我認為地下可能是……。"></textarea></label>
+        <label>證據 Evidence<textarea id="evidence" data-note="evidence" placeholder="寫出距離、到時、斜率或模型誤差。例如：3–15 m 的斜率約 ___ ms/m。"></textarea></label>
+        <label>推理 Reasoning<textarea id="reasoning" data-note="reasoning" placeholder="為什麼這些觀察支持主張？路徑和速度如何影響誰先到？"></textarea></label>
+      </div>
+      <label for="next-test">這個模型還不能確定什麼？下一次要觀察什麼？</label>
+      <textarea id="next-test" data-note="next-test" placeholder="目前還不確定……。下一次我會……。若模型正確，應該看到……。"></textarea>
+      <div class="exit-ticket">
+        <h3>Exit Ticket</h3>
+        <ol>
+          <li>走時圖的第二段比較平，這一段的速度比較快還是比較慢？你怎麼知道？</li>
+          <li>若只有五個近距離感測器，能不能說地下只有一層？為什麼？</li>
+          <li>哪些是你觀察到的？哪些是你用來解釋的模型？</li>
+        </ol>
+        <label for="exit">我的回答</label>
+        <textarea id="exit" data-note="exit" placeholder="1. …　2. …　3. …"></textarea>
+      </div>
+      <button id="export-bottom" class="primary">下載我的完整探究紀錄</button>
+      <p class="small">下載檔包含三輪的預測、觀察與解釋。</p>
+      <p class="closing">Predict. Observe. Explain what the evidence changes.</p>
     </section>
   </div></div>
-  <details class="teacher card"><summary>教師備課／示範資料／科學與量測說明</summary><div class="teacher-body"><p><b>15 分鐘試教：</b>0–2 分鐘問題與預測；2–5 分鐘逐步加入 1、2、3、5 個感測器；5–8 分鐘標記第一到時與近距離速度；8–10 分鐘延長到 12 個感測器，檢查原模型；10–13 分鐘提出兩層模型、比較路徑；13–15 分鐘 CER 與 Exit Ticket。</p><p><b>固定的示範地下：</b>v₁ = 300 m/s、v₂ = 900 m/s、h = 6 m。交會距離約 16.97 m，前五站（3–15 m）由直達波先到，18 m 起由臨界折射波先到。各階段使用同一地下，擴增感測器不會偷偷改變模型。</p><button id="teacher-model" class="secondary">載入示範模型並標記到時</button><p><b>波形：</b>以解析走時加上因果衰減振盪合成，含直達波與符合距離條件的首波；非完整彈性波場，未模擬反射、面波及真實儀器響應。背景雜訊可切換；第一到時提示是模擬真值，學生點選則有讀取誤差。</p><p><b>真實量測：</b>應同步記錄並量測敲擊觸發時間；單純「開啟後等十秒」不保證毫秒級震源時間。未知敲擊時刻但站間同步時，站間到時差仍可估速度；厚度的截距時間解釋需要可靠的時間零點。3 m 間距與數十毫秒走時需要足夠取樣率、同步與耦合；一般低取樣率感測器不一定能完成這項量測。</p><p><b>教學實作：</b>由教師操作敲擊，以適當敲擊板及現場規範布設，檢查噪音、接地耦合與訊號品質。五個感測器可透過分批移動延長測線，但要固定震源、同步觸發、重複敲擊並檢查每次的一致性；此網站延伸情境是新增同時同步的感測器。</p><p><b>評量：</b>看學生是否能引用觀測、區分資料與假說、提出可檢驗預測、依新證據修正模型。不要只評分參數是否與示範值完全相同。</p><details><summary>Exit Ticket 參考回答</summary><ol><li>在橫軸距離、縱軸時間的走時圖，較小斜率對應較大的表觀傳播速度。</li><li>不能；測線可能未跨過交會距離，也可能有本方法無法辨識的低速或薄層。</li><li>波形與第一到時是觀測及讀取結果；地下分層、速度、厚度與路徑是用來解釋資料的模型，需額外證據檢驗。</li></ol></details><p><b>資料與部署參考：</b><a href="https://www.epa.gov/environmental-geophysics/seismic-refraction" target="_blank" rel="noopener">US EPA：Seismic Refraction</a>；<a href="https://docs.github.com/en/pages/quickstart" target="_blank" rel="noopener">GitHub Pages 官方指南</a>。本站不需要網路函式庫即可運作。</p></div></details>
+  <details class="teacher card"><summary>教師備課：POE 流程、示範數值、評量</summary>
+    <div class="teacher-body">
+      <h3>這一頁怎麼用 POE</h3>
+      <p>每一輪都先讓學生寫預測，再敲擊、標記，最後對照並改寫解釋。學生頁面不會先說出遠處比較早到。請等他們寫完預測，再進入下一輪。</p>
+      <div class="table-scroll"><table>
+        <thead><tr><th>輪次</th><th>預測</th><th>觀察</th><th>解釋</th></tr></thead>
+        <tbody>
+          <tr><td>01 近距離</td><td>遠站較早、同時，還是較晚到？</td><td>1 到 5 站的波形與第一到時</td><td>距離和到時的規律，並預測更遠的站</td></tr>
+          <tr><td>02 新證據</td><td>依近距離直線，寫出遠處的到時</td><td>延伸到 12 站，標記新測站</td><td>新點和預測哪裡不同，提出可檢驗的新解釋</td></tr>
+          <tr><td>03 模型</td><td>遠站由哪一條路徑先到？</td><td>模型曲線、誤差、路徑競賽</td><td>主張、證據、推理，以及模型限制</td></tr>
+        </tbody>
+      </table></div>
+      <h3>15 分鐘試教</h3>
+      <div class="table-scroll"><table>
+        <thead><tr><th>時間</th><th>操作</th><th>可以收的證據</th></tr></thead>
+        <tbody>
+          <tr><td>0–2 分</td><td>第一輪，先寫預測</td><td>學生寫出遠近差異與理由</td></tr>
+          <tr><td>2–6 分</td><td>1 到 5 站，標記到時</td><td>學生指出波形起點，並比較遠近</td></tr>
+          <tr><td>6–8 分</td><td>看走時圖，寫第一輪解釋</td><td>學生用近站斜率預測 18 m 或 36 m</td></tr>
+          <tr><td>8–11 分</td><td>第二輪，先預測再敲 12 站</td><td>學生指出新觀察和原預測的差異</td></tr>
+          <tr><td>11–15 分</td><td>第三輪模型、路徑競賽、Exit Ticket</td><td>學生區分觀察與模型，並提出下一次檢驗</td></tr>
+        </tbody>
+      </table></div>
+      <p>完整課可用 45–90 分鐘，讓學生自己標記、選分界、調參數。15 分鐘試教可在手動標記一兩站後，再用到時提示，把時間留給推理。</p>
+      <h3>示範地下</h3>
+      <ul>
+        <li>固定模型：v₁ = 300 m/s，v₂ = 900 m/s，h = 6 m。</li>
+        <li>交會距離約 16.97 m。前五站（3–15 m）由直達波先到，18 m 起由臨界折射波先到。</li>
+        <li>三輪用的是同一個地下。增加感測器不會偷偷改模型。</li>
+      </ul>
+      <button id="teacher-model" class="secondary">載入示範模型並標記到時</button>
+      <h3>解讀時要守住的界線</h3>
+      <ul>
+        <li>18 m 的直達波原本約 60 ms，模擬首波約 57.71 ms。36 m 的直達波原本約 120 ms，首波約 77.71 ms。遠站仍然比近站晚到，只是比單一速度的預測早到。</li>
+        <li>波形是合成的教學資料，不是校園地下的真實地層。速度不能單獨決定岩石名稱。</li>
+        <li>五站只到 15 m，還沒有經過交會距離。看到一條直線，不能說地下一定只有一層。</li>
+        <li>RMSE 小，只表示模型接近目前標記的到時。請學生用沒有拿來調參數的新觀察再檢驗。</li>
+        <li>現地需要同步時鐘與敲擊觸發。本站用 4,000 Hz 的同步取樣做示範。低取樣率或不同步的裝置，未必能分辨這幾毫秒。</li>
+      </ul>
+      <p><b>評量：</b>看學生是否先寫預測、引用觀察數字、區分資料與模型，並依新證據修改解釋。參數不必和示範值完全相同。</p>
+      <details><summary>Exit Ticket 參考回答</summary>
+        <ol>
+          <li>橫軸是距離、縱軸是時間時，較平的一段斜率較小，對應較快的速度。</li>
+          <li>不能。測線可能還沒有經過交會距離，也可能有這個方法看不出的低速層或薄層。</li>
+          <li>波形和第一到時是觀察。分層、速度、厚度和路徑是模型，要用新的觀察再檢驗。</li>
+        </ol>
+      </details>
+      <p class="small">原理參考：<a href="https://www.epa.gov/environmental-geophysics/seismic-refraction" target="_blank" rel="noopener">US EPA：Seismic Refraction</a>。本站不需要外掛函式庫。</p>
+    </div>
+  </details>
 </main>
-<footer><span>震波探究實驗室 · 地球物理 × 科學建模</span><span>Observation → Pattern → Model → Prediction → Test</span></footer>
+<footer><span>震波探究實驗室 · 地球物理 × 科學建模</span><span>Prediction → Observation → Explain</span></footer>
 <noscript><p>請啟用 JavaScript 以使用互動模擬。教學說明可在下載包中的教師指南閱讀。</p></noscript>
-</body></html>
+</body>
+</html>
