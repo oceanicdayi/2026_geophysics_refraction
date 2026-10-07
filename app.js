@@ -23,12 +23,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = Physics;
 if (typeof document !== 'undefined') (() => {
   const $ = id => document.getElementById(id), TRUE = {v1:300,v2:900,h:6};
   const state = {step:0,n:1,recorded:false,full:false,noise:false,picks:{},shot:0,animation:0,rayFrame:0,split:15,fitVisible:false,modelType:'one',v1:300,v2:700,h:4,ray:1};
-  const prompts = [
-    ['一個訊號，能告訴我們多少？','從一個感測器開始，逐步增加到 2、3、4、5 個。先預測遠近站的差異，再敲擊取得證據。'],
-    ['距離和到時，有什麼規律？','標記第一到時，把觀測轉成距離—走時圖。用近距離的規律預測更遠的感測器。'],
-    ['更多證據，會改變原來的解釋嗎？','增加到 8、12、16 個感測器。遠處的到時是否仍沿原本的直線？提出可以檢驗的假說。'],
-    ['什麼地下模型，能解釋觀測？','先試單一速度，再考慮水平兩層。比較模型預測與觀測，修正你的解釋。'],
-    ['我們如何知道看不見的地下？','用主張、證據與推理說明你的模型，並提出下一次檢驗和仍未解決的問題。']
+  const rounds = [
+    {title:'第一輪｜近距離測線',question:'遠的感測器會比較晚收到震波嗎？先寫下來，再敲擊看結果。',moves:['寫下遠近站誰先到，以及理由。','從 1 個加到 5 個。敲擊後，標記每一站的第一到時。','說出距離和到時的規律，並用它預測更遠的站。']},
+    {title:'第二輪｜檢驗預測',question:'若近距離的直線一直延伸，遠處的震波何時會到？',moves:['先寫下遠處的預測時間，再敲擊。','延伸到 12 個感測器，標記新測站的第一到時。','對照預測與觀察。不一樣的地方，改寫你的解釋。']},
+    {title:'第三輪｜解釋模型',question:'哪一種地下模型，能解釋你標記的到時？',moves:['先預測遠站會由哪一條路徑先到。','調整速度與厚度，看紫色線是否接近你的點。','用主張、證據、推理寫下解釋，並說出模型的限制。']}
   ];
   const colors = {teal:'#45e0c6',amber:'#ffc365',purple:'#c6a6ff',muted:'#98b4c7',grid:'#254356',text:'#e1edf5'};
   let waveGeom, travelGeom, notes = {}, saveTimer;
@@ -37,21 +35,31 @@ if (typeof document !== 'undefined') (() => {
   function truePaths(x) { return Physics.paths(x,TRUE.v1,TRUE.v2,TRUE.h); }
   function modelPaths(x) { return Physics.paths(x,state.v1,state.v2,state.h,state.modelType==='two'); }
   function waveEnd() { return Math.max(90,state.n*10+45); }
-  function points() { return state.recorded ? Array.from({length:state.n},(_,i)=>({x:(i+1)*3,t:state.picks[i+1]})).filter(p=>Number.isFinite(p.t)) : []; }
+  function points() { return Array.from({length:state.n},(_,i)=>({x:(i+1)*3,t:state.picks[i+1]})).filter(p=>Number.isFinite(p.t)); }
   function setCount(n) {
     n=Number(n);if(!Number.isInteger(n)||n<1||n>16) throw new Error('感測器數量需為 1–16 的整數。');
     cancelAnimationFrame(state.rayFrame); state.animation++;
     state.n=n;state.recorded=false;state.ray=Math.min(state.ray,n);state.fitVisible=false;
-    $('strike').disabled=false;$('record-status').textContent='配置已更新，請敲擊取得這組感測器的同步紀錄。先前到時標記會保留於相同測點。';render();
+    $('strike').disabled=false;$('record-status').textContent='配置已更新。先寫預測，再敲擊。已標記的到時會留在走時圖上。';render();
   }
   function setStep(step) {
     state.step=step;
-    if (step===1 && state.n<5) setCount(5);
-    if (step===2 && state.n<=5) setCount(12);
+    if (step===1 && state.n<=5) setCount(12);
     document.querySelectorAll('[data-step]').forEach(b=>{const active=Number(b.dataset.step)===step;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
-    $('step-number').textContent=`0${step+1} / 05`; $('step-title').textContent=prompts[step][0];$('step-question').textContent=prompts[step][1];
-    $('next-step').textContent=step===4?'回到第一步':'下一步';
-    $('analysis').hidden=step<1;$('surprise').hidden=step<2;$('model-section').hidden=step<3;$('conclusion').hidden=step<4;$('model-legend').hidden=step<3;
+    const round=rounds[step];
+    $('step-number').textContent=`0${step+1} / 03`;
+    $('step-title').textContent=round.title;$('step-question').textContent=round.question;
+    ['move-p','move-o','move-e'].forEach((id,i)=>$(id).textContent=round.moves[i]);
+    $('next-step').textContent=step===2?'回到第一輪':'下一步';
+    $('surprise').hidden=step<1;$('model-section').hidden=step<2;$('conclusion').hidden=step<2;$('model-legend').hidden=step<2;
+    $('two-segment').hidden=step<1;
+    $('predict-far').hidden=step<1;
+    const stack=$('predict-stack');
+    if(step===0) stack.append($('predict-near'),$('predict-far'));
+    else stack.append($('predict-far'),$('predict-near'));
+    $('predict-near').open=step===0;$('observe-near').open=step===0;$('explain-near').open=step===0;
+    $('predict-far').open=step===1;$('far-details').open=step===1;
+    if(step===1 && !state.recorded) $('record-status').textContent='測線已延長。先寫上方的預測，再按「敲擊並記錄」。';
     render();
   }
   function layout() {
@@ -108,7 +116,7 @@ if (typeof document !== 'undefined') (() => {
     const g=canvasSetup('travel',330),{ctx,width,height}=g,left=width<450?48:65,right=width-23,top=25,bottom=height-45;
     const ps=points(),fit=Physics.fit(ps.filter(p=>p.x<=state.split)),maxX=Math.max(18,state.n*3+3);
     let maxT=Math.max(80,...ps.map(p=>p.t),fit?Math.max(0,fit.intercept+fit.slope*maxX):0);
-    if(state.step>=3)maxT=Math.max(maxT,modelPaths(maxX).first);
+    if(state.step>=2)maxT=Math.max(maxT,modelPaths(maxX).first);
     maxT=Math.ceil(maxT/20)*20+20;
     const x=v=>left+(right-left)*v/maxX,y=v=>bottom-(bottom-top)*v/maxT;
     travelGeom={...g,left,right,top,bottom,maxX,maxT};
@@ -116,24 +124,35 @@ if (typeof document !== 'undefined') (() => {
     text(ctx,'t（ms）',left,15);text(ctx,'x（m）',right,height-8,colors.muted,'right');
     if(fit&&fit.slope>0){line(ctx,x(0),y(fit.intercept),x(maxX),y(fit.intercept+fit.slope*maxX),colors.amber,1.5,[6,5]);}
     if(state.fitVisible){const far=Physics.fit(ps.filter(p=>p.x>state.split));if(far)line(ctx,x(state.split),y(far.intercept+far.slope*state.split),x(maxX),y(far.intercept+far.slope*maxX),colors.teal,1.5,[3,3]);}
-    if(state.step>=3){ctx.beginPath();ctx.strokeStyle=colors.purple;ctx.lineWidth=2.5;for(let j=0;j<=400;j++){const v=maxX*j/400,t=modelPaths(v).first;j?ctx.lineTo(x(v),y(t)):ctx.moveTo(x(v),y(t));}ctx.stroke();}
+    if(state.step>=2){ctx.beginPath();ctx.strokeStyle=colors.purple;ctx.lineWidth=2.5;for(let j=0;j<=400;j++){const v=maxX*j/400,t=modelPaths(v).first;j?ctx.lineTo(x(v),y(t)):ctx.moveTo(x(v),y(t));}ctx.stroke();}
     ps.forEach(p=>{ctx.beginPath();ctx.fillStyle=colors.teal;ctx.arc(x(p.x),y(p.t),4.5,0,Math.PI*2);ctx.fill();});
     if(!ps.length)text(ctx,'先在波形或到時表格標記觀測',width/2,height/2,colors.text,'center');
   }
   function table() {
-    $('pick-table').innerHTML=Array.from({length:state.n},(_,i)=>{const s=i+1,p=state.picks[s],has=state.recorded&&Number.isFinite(p);return `<tr><td>S${s}</td><td>${s*3}</td><td><input type="number" aria-label="S${s} 第一到時，毫秒" data-pick="${s}" min="0" max="${waveEnd()}" step="any" ${!state.recorded?'disabled':''} value="${has?p:''}" placeholder="未標記"></td><td id="absolute-${s}">${has?(10+p/1000).toFixed(5):'—'}</td></tr>`;}).join('');
+    $('pick-table').innerHTML=Array.from({length:state.n},(_,i)=>{const s=i+1,p=state.picks[s],has=Number.isFinite(p);return `<tr><td>S${s}</td><td>${s*3}</td><td><input type="number" aria-label="S${s} 第一到時，毫秒" data-pick="${s}" min="0" max="${waveEnd()}" step="any" ${!state.recorded?'disabled':''} value="${has?p:''}" placeholder="${state.recorded?'未標記':'敲擊後可輸入'}"></td><td id="absolute-${s}">${has?(10+p/1000).toFixed(5):'—'}</td></tr>`;}).join('');
     $('pick-table').querySelectorAll('input').forEach(input=>input.addEventListener('change',()=>{const s=Number(input.dataset.pick),v=Number(input.value);if(input.value==='')delete state.picks[s];else if(Number.isFinite(v)&&v>=0&&v<=waveEnd())state.picks[s]=v;else{input.value=Number.isFinite(state.picks[s])?state.picks[s]:'';input.setCustomValidity(`請填寫 0–${waveEnd()} ms。`);input.reportValidity();return;}input.setCustomValidity('');$(`absolute-${s}`).textContent=Number.isFinite(state.picks[s])?(10+state.picks[s]/1000).toFixed(5):'—';updatePlots();}));
     $('ray-station').innerHTML=Array.from({length:state.n},(_,i)=>`<option value="${i+1}" ${state.ray===i+1?'selected':''}>S${i+1} · ${(i+1)*3} m</option>`).join('');
   }
   function fitMessage() {
     const ps=points(),near=Physics.fit(ps.filter(p=>p.x<=state.split)),far=Physics.fit(ps.filter(p=>p.x>state.split));
-    if(!near){$('fit-results').textContent='至少標記兩個近距離到時，才能估算斜率。';return;}
-    let html=`近距離斜率 <b>${near.slope.toFixed(3)} ms/m</b>；表觀速度 <b>${near.velocity?near.velocity.toFixed(0)+' m/s':'無法由非正斜率估算'}</b>。<br>t ≈ ${near.intercept.toFixed(2)} + ${near.slope.toFixed(3)}x（ms）。`;
-    if(state.fitVisible){if(!far)html+='<br>遠距離至少還需要兩個到時點。';else{html+=`<br>遠距離斜率 <b>${far.slope.toFixed(3)} ms/m</b>；表觀速度 <b>${far.velocity?far.velocity.toFixed(0)+' m/s':'無法由非正斜率估算'}</b>；截距 ${far.intercept.toFixed(2)} ms。`;
-      const ti=far.intercept-near.intercept;
-      if(far.velocity>near.velocity&&near.velocity>0&&ti>0){const xc=ti/(near.slope-far.slope),h=ti/1000*near.velocity/(2*Math.sqrt(1-(near.velocity/far.velocity)**2));html+=`<br>若假設水平兩層、可靠時間零點與合適分段：交會距離約 <b>${xc.toFixed(2)} m</b>；厚度約 <b>${h.toFixed(2)} m</b>。`;}else html+='<br>這組分段尚不支持高速下層的截距法估厚；檢查標記、分界與模型假設。';}
-      html+='<br><span class="small">兩點可定一直線，卻不足以檢查散布。分界選錯會混合不同分支；請與波形和資料點一起判斷。</span>';
-    }$('fit-results').innerHTML=html;
+    if(!near){$('fit-results').textContent='至少標記兩個近距離到時，才能估算速度。';return;}
+    const speed=near.velocity?near.velocity.toFixed(0)+' m/s':'無法由這條線估算';
+    let html=`<p>近距離斜率 <b>${near.slope.toFixed(3)} ms/m</b>，速度約 <b>${speed}</b>。</p>`;
+    html+=`<p>直線：t ≈ ${near.intercept.toFixed(2)} + ${near.slope.toFixed(3)} × x。t 是毫秒，x 是公尺。斜率越小，速度越快。</p>`;
+    if(state.fitVisible){
+      if(!far)html+='<p>遠距離至少再標記兩個到時，才能畫第二段直線。</p>';
+      else{
+        const farSpeed=far.velocity?far.velocity.toFixed(0)+' m/s':'無法由這條線估算';
+        html+=`<p>遠距離斜率 <b>${far.slope.toFixed(3)} ms/m</b>，速度約 <b>${farSpeed}</b>。截距 ${far.intercept.toFixed(2)} ms。</p>`;
+        const ti=far.intercept-near.intercept;
+        if(far.velocity>near.velocity&&near.velocity>0&&ti>0){
+          const xc=ti/(near.slope-far.slope),h=ti/1000*near.velocity/(2*Math.sqrt(1-(near.velocity/far.velocity)**2));
+          html+=`<p>若地層水平、時間零點可靠，而且分段選對：交會距離約 <b>${xc.toFixed(2)} m</b>，上層厚度約 <b>${h.toFixed(2)} m</b>。</p>`;
+        }else html+='<p>這組分段還不能用截距法估計高速下層的厚度。請檢查到時標記、分界位置，以及模型假設。</p>';
+        html+='<p class="small">兩個點就能連成直線，卻看不出散布。分界若切錯，會把兩種波混在一起。請同時看波形和圖上的點。</p>';
+      }
+    }
+    $('fit-results').innerHTML=html;
   }
   function drawSection(progress=null) {
     if($('model-section').hidden)return;
@@ -159,9 +178,9 @@ if (typeof document !== 'undefined') (() => {
     const two=state.modelType==='two';$('v2').disabled=!two;$('depth').disabled=!two;
     const ps=points(),rmse=ps.length?Math.sqrt(ps.reduce((s,p)=>s+(p.t-modelPaths(p.x).first)**2,0)/ps.length):null,p=modelPaths(state.ray*3);
     let html=`<div class="metrics"><div class="metric"><span>模型與已標記觀測的 RMSE</span><strong>${rmse===null?'尚無到時':rmse.toFixed(2)+' ms'}</strong></div><div class="metric"><span>S${state.ray} 直達波預測</span><strong>${p.direct.toFixed(2)} ms</strong></div><div class="metric"><span>S${state.ray} 臨界折射波預測</span><strong>${Number.isFinite(p.head)?p.head.toFixed(2)+' ms':'無有效路徑'}</strong></div></div>`;
-    if(two&&state.v2>state.v1)html+=`<p style="margin:12px 0 0">你的模型：交會距離 <b>${p.crossover.toFixed(2)} m</b>；截距 <b>${p.intercept.toFixed(2)} ms</b>。${state.ray*3<p.critical?'此站尚未達到臨界折射路徑成立的距離。':p.head<p.direct?'此站由經高速層的路徑先到。':'此站由直達路徑先到。'}</p>`;
-    else if(two)html+='<p style="margin:12px 0 0">v₂ ≤ v₁：下層不是高速層，沒有這種臨界折射首波分支。只用這組首波資料可能無法辨識低速下層。</p>';
-    html+='<p class="small" style="margin:8px 0 0">RMSE 只比較目前有標記的站；低誤差不代表模型唯一，也不代表已驗證岩性。</p>';$('model-results').innerHTML=html;
+    if(two&&state.v2>state.v1)html+=`<p>這個模型的交會距離是 <b>${p.crossover.toFixed(2)} m</b>，截距是 <b>${p.intercept.toFixed(2)} ms</b>。${state.ray*3<p.critical?'這一站還沒有有效的臨界折射路徑。':p.head<p.direct?'這一站預測由經過下層的路徑先到。':'這一站預測由直達路徑先到。'}</p>`;
+    else if(two)html+='<p>下層速度沒有比上層快，就不會出現這條臨界折射的第二段直線。低速下層可能藏在資料裡，這組首波看不出來。</p>';
+    html+='<p class="small">RMSE 只表示模型和目前標記有多接近。誤差小，不代表這是唯一答案，也不能單靠速度判斷岩石種類。</p>';$('model-results').innerHTML=html;
   }
   function updatePlots() {drawWaves();drawTravel();fitMessage();modelMessage();drawSection();$('pick-summary').textContent=points().length?`已標記 ${points().length} / ${state.n} 站`:'尚未標記';}
   function render() {
@@ -169,7 +188,8 @@ if (typeof document !== 'undefined') (() => {
     document.querySelectorAll('[data-count]').forEach(b=>{const selected=Number(b.dataset.count)===state.n;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
     $('zoom-view').classList.toggle('selected',!state.full);$('full-view').classList.toggle('selected',state.full);$('zoom-view').setAttribute('aria-pressed',String(!state.full));$('full-view').setAttribute('aria-pressed',String(state.full));
     $('wave-scale').textContent=state.full?'橫軸：開始記錄後時間（s）；敲擊在第 10 秒':'橫軸：敲擊後時間（ms）；縱向：距離（m）';
-    $('wave-help').textContent=state.full?'完整紀錄中的震波擠在第 10 秒附近。切回「到時放大」才能辨識毫秒級差異並點選第一到時。':'在每列波形「最早開始偏離背景」的位置點選第一到時。選波形起點，不是最高波峰；也可用下方表格輸入。';
+    $('wave-help').textContent=state.full?'完整紀錄裡，震波擠在第 10 秒附近。要標記到時，請切回「到時放大」。':'請點每列波形最早離開背景的位置。那一點是第一到時。最高波峰會受波形疊加影響。也可以用下方表格輸入。';
+    $('far-fit-legend').hidden=!state.fitVisible;
     $('auto-pick').disabled=!state.recorded;$('clear-picks').disabled=!state.recorded;$('export-csv').disabled=!state.recorded;
     layout();table();updatePlots();
   }
@@ -185,12 +205,12 @@ if (typeof document !== 'undefined') (() => {
   function exportCSV() {download('震波探究_到時.csv','station,distance_m,travel_time_ms,record_arrival_s,source\n'+points().map(p=>`S${p.x/3},${p.x},${p.t},${(10+p.t/1000).toFixed(6)},teaching_simulation`).join('\n'),'text/csv;charset=utf-8');}
   function exportNotes() {
     document.querySelectorAll('[data-note]').forEach(el=>notes[el.dataset.note]=el.value);
-    const sections=[['prediction','敲擊前的預測'],['hypothesis','假說與預測'],['revision','模型修正'],['claim','Claim｜主張'],['evidence','Evidence｜證據'],['reasoning','Reasoning｜推理'],['next-test','下一次檢驗與模型限制'],['exit','Exit Ticket']];
-    const ps=points();let md=`# 震波探究學習紀錄\n\n日期：${new Date().toLocaleString('zh-TW')}\n\n本紀錄使用教學模擬資料，非現地觀測。\n\n## 測線配置\n\n- 感測器：${state.n} 站，間距 3 m，第一站 3 m\n- 敲擊時間：紀錄第 10 秒；總長 20 秒；同步取樣率 4,000 Hz\n- 背景雜訊：${state.noise?'有':'無'}\n- 使用到時真值提示：${notes.usedHint||'否'}\n- 目前配置是否已取得紀錄：${state.recorded?'是':'否'}\n\n## 已標記的到時\n\n|站|距離（m）|敲擊後走時（ms）|\n|---|---:|---:|\n${ps.map(p=>`|S${p.x/3}|${p.x}|${p.t}|`).join('\n')||'|尚無標記|—|—|'}\n\n## 目前提出的模型\n\n${state.modelType==='two'?`水平兩層：v₁=${state.v1} m/s、v₂=${state.v2} m/s、h=${state.h} m`:`單一均勻介質：v=${state.v1} m/s`}\n\n`;
+    const sections=[['prediction','第一輪 Prediction｜預測'],['observation','第一輪 Observation｜觀察'],['explain-near','第一輪 Explain｜解釋'],['predict-far','第二輪 Prediction｜預測'],['observe-far','第二輪 Observation｜觀察'],['hypothesis','第二輪 Explain｜解釋'],['predict-model','第三輪 Prediction｜預測'],['revision','第三輪 Explain｜模型修正'],['claim','Explain｜主張 Claim'],['evidence','Explain｜證據 Evidence'],['reasoning','Explain｜推理 Reasoning'],['next-test','模型限制與下一次檢驗'],['exit','Exit Ticket']];
+    const ps=points();let md=`# 震波探究學習紀錄\n\n日期：${new Date().toLocaleString('zh-TW')}\n\n本紀錄依照 Prediction（預測）、Observation（觀察）、Explain（解釋）撰寫，使用教學模擬資料，不是現地觀測。\n\n## 測線配置\n\n- 感測器：${state.n} 站，間距 3 m，第一站 3 m\n- 敲擊時間：紀錄第 10 秒；總長 20 秒；同步取樣率 4,000 Hz\n- 背景雜訊：${state.noise?'有':'無'}\n- 使用到時真值提示：${notes.usedHint||'否'}\n- 目前配置是否已取得紀錄：${state.recorded?'是':'否'}\n\n## 已標記的到時\n\n|站|距離（m）|敲擊後走時（ms）|\n|---|---:|---:|\n${ps.map(p=>`|S${p.x/3}|${p.x}|${p.t}|`).join('\n')||'|尚無標記|—|—|'}\n\n## 目前提出的模型\n\n${state.modelType==='two'?`水平兩層：v₁=${state.v1} m/s、v₂=${state.v2} m/s、h=${state.h} m`:`單一均勻介質：v=${state.v1} m/s`}\n\n`;
     md+=sections.map(([key,title])=>`## ${title}\n\n${notes[key]||'（尚未填寫）'}\n\n`).join('');md+='## 原理與限制\n\n在橫軸 x、縱軸 t 的走時圖，斜率是速度的倒數。兩段首波斜率可支持速度分層模型，但不能單獨確定岩性或唯一地下構造。模型需以新證據檢驗。\n\n參考：https://www.epa.gov/environmental-geophysics/seismic-refraction\n';download('震波探究_學習紀錄.md',md,'text/markdown;charset=utf-8');
   }
   $('sensor-count').addEventListener('input',e=>setCount(e.target.value));document.querySelectorAll('[data-count]').forEach(b=>b.addEventListener('click',()=>setCount(b.dataset.count)));
-  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>setStep(Number(b.dataset.step))));$('next-step').addEventListener('click',()=>setStep((state.step+1)%5));$('strike').addEventListener('click',strike);
+  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>setStep(Number(b.dataset.step))));$('next-step').addEventListener('click',()=>setStep((state.step+1)%3));$('strike').addEventListener('click',strike);
   $('noise').addEventListener('change',e=>{state.noise=e.target.checked;drawWaves();});
   $('zoom-view').addEventListener('click',()=>{state.full=false;render();});$('full-view').addEventListener('click',()=>{state.full=true;render();});
   $('waves').addEventListener('click',event=>{
@@ -205,7 +225,7 @@ if (typeof document !== 'undefined') (() => {
     cancelAnimationFrame(state.rayFrame);const p=modelPaths(state.ray*3),end=Math.max(p.direct,Number.isFinite(p.head)?p.head:0),started=performance.now(),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:2400;
     const animate=now=>{const f=duration?Math.min(1,(now-started)/duration):1;drawSection(f*end);if(f<1)state.rayFrame=requestAnimationFrame(animate);};state.rayFrame=requestAnimationFrame(animate);
   });
-  $('teacher-model').addEventListener('click',()=>{cancelAnimationFrame(state.rayFrame);state.animation++;state.n=12;state.recorded=true;state.modelType='two';state.v1=300;state.v2=900;state.h=6;state.ray=12;state.fitVisible=true;state.split=15;$('split').value='15';$('model-type').value='two';$('v1').value=300;$('v2').value=900;$('depth').value=6;$('strike').disabled=false;setStep(3);autoPick();});
+  $('teacher-model').addEventListener('click',()=>{cancelAnimationFrame(state.rayFrame);state.animation++;state.n=12;state.recorded=true;state.modelType='two';state.v1=300;state.v2=900;state.h=6;state.ray=12;state.fitVisible=true;state.split=15;$('split').value='15';$('model-type').value='two';$('v1').value=300;$('v2').value=900;$('depth').value=6;$('strike').disabled=false;setStep(2);autoPick();});
   $('export-csv').addEventListener('click',exportCSV);$('export-top').addEventListener('click',exportNotes);$('export-bottom').addEventListener('click',exportNotes);
   let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(updatePlots,100);});setStep(0);
   // Optional browser agent tools. No dependency or network call in unsupported browsers.
